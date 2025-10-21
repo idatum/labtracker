@@ -164,13 +164,4 @@ podman run -d \
 - **Options**: Hierarchical configuration system with environment variable support
 
 ## Unit tests
-In LabTracker.test, run `dotnet test`
-
-## Logging
-
-Logging has configurable levels:
-
-```bash
-# Set log level via environment variable
-LOGGING__LOGLEVEL__DEFAULT=Information
-```
+In LabTracker.Tests, run `dotnet test`
