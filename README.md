@@ -1,18 +1,12 @@
 # LabTracker
 
-.NET background service that monitors UniFi Access Point client connections and publishes events to MQTT. Designed for home automation like Home Assistant to track device presence.
+.NET background service that periodically monitors UniFi Access Point client connections and publishes events to MQTT. Designed for home automation like Home Assistant to track device presence.
 
 Python version [here](https://github.com/idatum/unifi_tracker).
 
-## Summary
-
-- Periodic monitoring of UniFi Access Points using SSH key auth
-- MQTT integration with retained messages for home automation
-- Initialization from MQTT retained state or UniFi API
-
 ## Configuration
 
-Create `appsettings.Options.json`:
+Create `appsettings.Options.json` similar to this:
 
 ```json
 {
@@ -151,7 +145,7 @@ podman run -d \
 
 ## Initial State Options
 
-- **`MQTT`**: Read current client states from MQTT retained messages (recommended)
+- **`MQTT`**: Read current client states from MQTT retained messages
 - **`UnifiAPI`**: Query UniFi Controller API for current client states
 - **`None`**: Start with empty state, only track changes from startup
 
@@ -160,7 +154,7 @@ podman run -d \
 - **Worker**: Main background service with polling loop
 - **IClientInfoProvider**: Interface for retrieving client information
 - **IPublisher**: Interface for publishing events
-- **IPublished**: Interface for reading current state (MQTT/UniFi API/Null implementations)
+- **IPublished**: Interface for reading current state
 - **Options**: Hierarchical configuration system with environment variable support
 
 ## Unit tests

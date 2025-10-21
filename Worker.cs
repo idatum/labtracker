@@ -4,7 +4,6 @@ namespace LabTracker;
 
 /// <summary>
 /// Background service that monitors UniFi Access Points client connections.
-/// Uses IClientInfoProvider interface for retrieving client status.
 /// </summary>
 public class Worker : BackgroundService
 {
@@ -42,16 +41,12 @@ public class Worker : BackgroundService
     
     /// <summary>
     /// Main execution loop for the background service.
-    /// Initializes the publisher, then continuously polls UniFi Access Points
-    /// for client changes at the configured interval.
     /// </summary>
     /// <param name="stoppingToken">Cancellation token to stop the service</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Initialize the publisher (MQTT connection, etc.)
         await _publisher.InitializeAsync();
-        
-        // Read current published client states to initialize our tracking
+
         await InitializeClientStatesAsync();
         
         // Main monitoring loop - runs until service is stopped
@@ -66,7 +61,6 @@ public class Worker : BackgroundService
             catch (SshConnectionException)
             {
                 _logger.LogWarning("SSH connection failure detected. Processing will restart.");
-                // Break out of the loop to allow service restart
                 await Task.Delay(_options.DelayMs, stoppingToken);
                 break;
             }
@@ -78,7 +72,6 @@ public class Worker : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error in worker execution loop");
-                // For other exceptions, wait and continue
                 await Task.Delay(_options.DelayMs, stoppingToken);
             }
         }
@@ -96,6 +89,7 @@ public class Worker : BackgroundService
         {
             var currentStates = await _publishedReader.ReadCurrentStatesAsync();
             _logger.LogInformation("Found {count} existing client states", currentStates.Count);
+            
             // Group states by AP and initialize _lastClientsByAp
             foreach (var state in currentStates.Values.Where(s => s.IsConnected))
             {
@@ -113,10 +107,32 @@ public class Worker : BackgroundService
                 _logger.LogDebug("Initialized client {clientId} as connected to {ap}",
                     state.ClientId, apHostname);
             }
+            
             foreach (var ap in _lastClientsByAp)
             {
                 _logger.LogInformation("AP {ap} initialized with {count} connected clients: {clients}",
                     ap.Key, ap.Value.Count, string.Join(", ", ap.Value));
+            }
+
+            // If ForceSnapshot is true, publish the current state immediately after initialization
+            if (_publishedReader.ForceSnapshot)
+            {
+                _logger.LogInformation("ForceSnapshot enabled - publishing current client states");
+                
+                // Create client diff structure with all current clients as "new" clients
+                var clientDiffPerAp = new Dictionary<string, (List<string> newClients, List<string> disconnectedClients)>();
+                var allConnectedClients = new HashSet<string>();
+                
+                foreach (var (ap, clients) in _lastClientsByAp)
+                {
+                    clientDiffPerAp[ap] = (clients.ToList(), new List<string>());
+                    foreach (var client in clients)
+                    {
+                        allConnectedClients.Add(client);
+                    }
+                }
+                
+                await PublishClientChanges(clientDiffPerAp, allConnectedClients);
             }
         }
         catch (Exception ex)
@@ -321,7 +337,6 @@ public class Worker : BackgroundService
         {
             if (stoppingToken.IsCancellationRequested) return;
             
-            _logger.LogDebug("Processing AP {hostname} with {count} clients", apHostname, clients.Count);
             var clientIds = ExtractClientIds(clients, apHostname, allConnectedClients);
             allClientIds.AddRange(clientIds);
         }
@@ -360,7 +375,6 @@ public class Worker : BackgroundService
             
             // Remove clients that reconnected (moved between APs) from disconnected list
             allDisconnectedClients = allDisconnectedClients.Except(allConnectedClients).ToList();
-            
             if (allNewClients.Count > 0 || allDisconnectedClients.Count > 0)
             {
                 await _publisher.PublishClientsAsync(Options.AllApsAggregate, allNewClients, allDisconnectedClients);

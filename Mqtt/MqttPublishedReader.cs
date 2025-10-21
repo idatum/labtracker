@@ -4,22 +4,38 @@ using MQTTnet.Protocol;
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace LabTracker;
+namespace LabTracker.Mqtt;
+
+using LabTracker;
 
 /// <summary>
-/// MQTT implementation that reads current published client states from retained messages
+/// MQTT implementation that reads current published client states from retained messages.
 /// </summary>
 public class MqttPublishedReader : IPublished
 {
     private readonly ILogger<MqttPublishedReader> _logger;
     private readonly Options _options;
 
+    /// <summary>
+    /// Gets a value indicating whether this implementation forces a complete snapshot of all clients.
+    /// </summary>
+    public bool ForceSnapshot => false;
+
+    /// <summary>
+    /// Initializes a new instance of the MqttPublishedReader class.
+    /// </summary>
+    /// <param name="logger">Logger for diagnostic output</param>
+    /// <param name="options">Configuration options containing MQTT broker settings</param>
     public MqttPublishedReader(ILogger<MqttPublishedReader> logger, IOptions<Options> options)
     {
         _logger = logger;
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Reads current client states from MQTT retained messages by subscribing to the configured topic pattern.
+    /// </summary>
+    /// <returns>A dictionary with client state keys and their corresponding connection states</returns>
     public async Task<Dictionary<string, ClientState>> ReadCurrentStatesAsync()
     {
         var clientStates = new ConcurrentDictionary<string, ClientState>();

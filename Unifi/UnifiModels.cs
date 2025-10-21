@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace LabTracker;
+namespace LabTracker.Unifi;
 
 public class UniFiSitesResponse
 {

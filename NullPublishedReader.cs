@@ -5,6 +5,8 @@ namespace LabTracker;
 /// </summary>
 public class NullPublishedReader : IPublished
 {
+    public bool ForceSnapshot => false;
+
     public Task<Dictionary<string, ClientState>> ReadCurrentStatesAsync()
     {
         // Return empty dictionary when initialization is disabled

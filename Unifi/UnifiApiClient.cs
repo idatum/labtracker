@@ -2,8 +2,15 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
-namespace LabTracker;
+namespace LabTracker.Unifi;
 
+using LabTracker;
+
+/// <summary>
+/// HTTP client implementation for interacting with UniFi Controller API.
+/// Provides methods to retrieve sites, devices, and wireless clients from UniFi controllers.
+/// Supports pagination and handles authentication via API key.
+/// </summary>
 public class UniFiApiClient : IUniFiApiClient
 {
     private readonly HttpClient _httpClient;

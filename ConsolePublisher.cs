@@ -1,7 +1,7 @@
 namespace LabTracker;
 
 /// <summary>
-/// Console implementation of the IPublisher interface for testing/debugging
+/// Console implementation of the IPublisher interface for testing/debugging.
 /// </summary>
 public class ConsolePublisher : IPublisher
 {

@@ -5,6 +5,9 @@ using Xunit;
 
 namespace LabTracker.Tests;
 
+using LabTracker;
+using LabTracker.Unifi;
+
 /// <summary>
 /// Integration tests to verify MAC address normalization across different sources
 /// </summary>

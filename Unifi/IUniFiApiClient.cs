@@ -1,4 +1,4 @@
-namespace LabTracker;
+namespace LabTracker.Unifi;
 
 /// <summary>
 /// Interface for UniFi API operations

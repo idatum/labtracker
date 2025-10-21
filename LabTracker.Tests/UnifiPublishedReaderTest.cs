@@ -5,6 +5,9 @@ using Xunit;
 
 namespace LabTracker.Tests;
 
+using LabTracker;
+using LabTracker.Unifi;
+
 public class UnifiPublishedReaderTest
 {
     private readonly Mock<ILogger<UnifiPublishedReader>> _mockLogger;

@@ -1,7 +1,7 @@
 namespace LabTracker;
 
 /// <summary>
-/// Exception thrown when SSH connection to UniFi Access Point fails
+/// Exception thrown when SSH connection to UniFi Access Point has unexpected response.
 /// </summary>
 public class SshConnectionException : Exception
 {

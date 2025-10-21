@@ -1,12 +1,11 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
 
 namespace LabTracker;
 
 /// <summary>
-/// SSH-based implementation of IClientInfoProvider for retrieving client information from UniFi Access Points
+/// SSH-based implementation of IClientInfoProvider for retrieving client information from UniFi Access Points.
 /// </summary>
 public class SshClientProvider : IClientInfoProvider
 {
@@ -20,7 +19,7 @@ public class SshClientProvider : IClientInfoProvider
     }
 
     /// <summary>
-    /// Retrieves client information from a specific host via SSH
+    /// Retrieves client information from a specific host via SSH.
     /// </summary>
     /// <param name="host">IP address or hostname of the target UniFi AP</param>
     /// <param name="stoppingToken">Cancellation token to abort the operation</param>
@@ -42,7 +41,7 @@ public class SshClientProvider : IClientInfoProvider
     }
 
     /// <summary>
-    /// Retrieves client information from multiple hosts in parallel
+    /// Retrieves client information from multiple hosts in parallel.
     /// </summary>
     /// <param name="hosts">Collection of IP addresses or hostnames of target devices</param>
     /// <param name="stoppingToken">Cancellation token to abort the operation</param>
@@ -112,7 +111,6 @@ public class SshClientProvider : IClientInfoProvider
 
     /// <summary>
     /// Creates SSH connection configuration for connecting to UniFi Access Points.
-    /// Uses private key authentication as configured in options.
     /// </summary>
     /// <param name="sshHost">Target host IP address or hostname</param>
     /// <returns>Configured ConnectionInfo object for SSH client</returns>
@@ -146,8 +144,8 @@ public class SshClientProvider : IClientInfoProvider
             return (hostname, clients);
         }
         
-        _logger.LogWarning("No vap_table found in response for {hostname}", hostname);
-        return (string.Empty, new List<ClientInfo>());
+        _logger.LogError("No vap_table found in response for {hostname}", hostname);
+        throw new SshConnectionException($"Invalid response from SSH host {hostname}: no vap_table found");
     }
 
     /// <summary>

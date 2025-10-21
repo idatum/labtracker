@@ -2,10 +2,12 @@ using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Protocol;
 
-namespace LabTracker;
+namespace LabTracker.Mqtt;
+
+using LabTracker;
 
 /// <summary>
-/// MQTT implementation of the IPublisher interface
+/// MQTT implementation of the IPublisher interface.
 /// </summary>
 public class MqttPublisher : IPublisher, IAsyncDisposable
 {
@@ -13,12 +15,20 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
     private readonly Options _options;
     private IMqttClient? _mqttClient;
 
+    /// <summary>
+    /// Initializes a new instance of the MqttPublisher class.
+    /// </summary>
+    /// <param name="logger">Logger for diagnostic output</param>
+    /// <param name="options">Configuration options containing MQTT broker settings</param>
     public MqttPublisher(ILogger<MqttPublisher> logger, IOptions<Options> options)
     {
         _logger = logger;
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the MQTT client is currently connected to the broker.
+    /// </summary>
     public bool IsConnected => _mqttClient?.IsConnected ?? false;
 
     private static MqttApplicationMessage CreateMessage(string topic, string payload, bool retain)
@@ -31,6 +41,10 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
             .Build();
     }
 
+    /// <summary>
+    /// Initializes the MQTT client and establishes connection to the configured broker.
+    /// </summary>
+    /// <returns>A task representing the asynchronous initialization operation</returns>
     public async Task InitializeAsync()
     {
         try
@@ -82,6 +96,13 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Publishes client connection and disconnection events to MQTT topics.
+    /// </summary>
+    /// <param name="apHostname">Hostname of the access point where the client events occurred</param>
+    /// <param name="connectedClients">List of client identifiers that connected</param>
+    /// <param name="disconnectedClients">List of client identifiers that disconnected</param>
+    /// <returns>A task representing the asynchronous publish operation</returns>
     public async Task PublishClientsAsync(string apHostname, List<string> connectedClients, List<string> disconnectedClients)
     {
         if (!IsConnected)
@@ -120,6 +141,10 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Asynchronously disposes of the MQTT client resources.
+    /// </summary>
+    /// <returns>A ValueTask representing the asynchronous disposal operation</returns>
     public async ValueTask DisposeAsync()
     {
         if (_mqttClient != null)

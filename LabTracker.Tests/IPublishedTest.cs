@@ -1,4 +1,5 @@
 using LabTracker;
+using LabTracker.Mqtt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;

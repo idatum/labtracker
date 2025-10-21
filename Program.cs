@@ -1,4 +1,6 @@
 using LabTracker;
+using LabTracker.Mqtt;
+using LabTracker.Unifi;
 
 var builder = Host.CreateApplicationBuilder(args);
 
