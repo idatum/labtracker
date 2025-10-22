@@ -303,12 +303,10 @@ public class MqttPublishedReaderParsingTest
     public void CreateClientStateKey_ShouldFormatCorrectly(string clientId, string? apHostname, string expected)
     {
         // Act
-        var createKeyMethod = typeof(MqttPublishedReader).GetMethod("CreateClientStateKey", 
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-        var result = createKeyMethod?.Invoke(null, new object?[] { clientId, apHostname });
+        var result = PublishedUtils.CreateClientStateKey(clientId, apHostname);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(expected, (string)result);
+        Assert.Equal(expected, result);
     }
 }

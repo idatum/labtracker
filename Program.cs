@@ -1,5 +1,6 @@
 using LabTracker;
 using LabTracker.Mqtt;
+using LabTracker.Ssh;
 using LabTracker.Unifi;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -47,11 +48,15 @@ switch (options.InitialState)
     case InitialState.MQTT:
         builder.Services.AddSingleton<IPublished, MqttPublishedReader>();
         break;
+    case InitialState.All:
+        builder.Services.AddSingleton<IPublished, CombinedPublishedReader>();
+        break;
     case InitialState.None:
         // Don't initialize client states - use null implementation
         builder.Services.AddSingleton<IPublished, NullPublishedReader>();
         break;
     default:
+        // Use MQTT as default for backward compatibility
         builder.Services.AddSingleton<IPublished, MqttPublishedReader>();
         break;
 }

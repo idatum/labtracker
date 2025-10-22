@@ -1,32 +1,36 @@
 namespace LabTracker;
 
 /// <summary>
-/// Defines how the application should initialize its state on startup
+/// Defines how the application should initialize its state on startup.
 /// </summary>
 public enum InitialState
 {
     /// <summary>
-    /// No initialization - start with empty state
+    /// No initialization - start with empty state.
     /// </summary>
     None,
     
     /// <summary>
-    /// Initialize state by reading current MQTT retained messages
+    /// Initialize state by reading current MQTT retained messages.
     /// </summary>
     MQTT,
     
     /// <summary>
-    /// Initialize state by querying UniFi API directly
+    /// Initialize state by querying UniFi API directly.
     /// </summary>
-    UnifiAPI
+    UnifiAPI,
+    
+    /// <summary>
+    /// Initialize state by combining both MQTT retained messages and UniFi API data.
+    /// </summary>
+    All
 }
 
 /// <summary>
-/// MQTT-specific configuration options
+/// MQTT-specific configuration options.
 /// </summary>
 public class MqttOptions
 {
-    public bool UseHostname { get; set; } = false;
     public string BrokerHost { get; set; } = "localhost";
     public int BrokerPort { get; set; } = 1883;
     public string TopicPrefix { get; set; } = "labtracker";
@@ -40,7 +44,7 @@ public class MqttOptions
 }
 
 /// <summary>
-/// UniFi API configuration options
+/// UniFi API configuration options.
 /// </summary>
 public class UnifiApiOptions
 {
@@ -52,7 +56,7 @@ public class UnifiApiOptions
 }
 
 /// <summary>
-/// UniFi SSH connection configuration options
+/// UniFi SSH connection configuration options.
 /// </summary>
 public class UnifiOptions
 {
@@ -66,17 +70,17 @@ public class Options
     public const string SectionName = "Options";
     
     /// <summary>
-    /// Constant for the aggregated AP name used when MqttIncludeApInTopic is false
+    /// Constant for the aggregated AP name used when MqttIncludeApInTopic is false.
     /// </summary>
     public const string AllApsAggregate = "all_aps";
     
     /// <summary>
-    /// UniFi SSH connection configuration section
+    /// UniFi SSH connection configuration section.
     /// </summary>
     public UnifiOptions Unifi { get; set; } = new();
     
     /// <summary>
-    /// UniFi API configuration section
+    /// UniFi API configuration section.
     /// </summary>
     public UnifiApiOptions UnifiApi { get; set; } = new();
     
@@ -86,7 +90,7 @@ public class Options
     public int MaxIdleTimeSeconds { get; set; } = 0; // 0 == disabled
     
     /// <summary>
-    /// MQTT configuration section
+    /// MQTT configuration section.
     /// </summary>
     public MqttOptions Mqtt { get; set; } = new();
     

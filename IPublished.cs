@@ -28,3 +28,20 @@ public class ClientState
     public DateTime LastUpdated { get; set; }
     public string? LastPayload { get; set; }
 }
+
+/// <summary>
+/// Utility methods for IPublished implementations.
+/// </summary>
+public static class PublishedUtils
+{
+    /// <summary>
+    /// Creates a standardized client state key combining AP hostname and client ID.
+    /// </summary>
+    /// <param name="clientId">The client identifier (typically MAC address)</param>
+    /// <param name="apHostname">The AP hostname or null for unknown AP</param>
+    /// <returns>A formatted key in the format "hostname:clientId"</returns>
+    public static string CreateClientStateKey(string clientId, string? apHostname)
+    {
+        return $"{apHostname ?? "unknown"}:{clientId}";
+    }
+}

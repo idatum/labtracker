@@ -2,11 +2,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
+using LabTracker;
+using LabTracker.Ssh;
+using LabTracker.Unifi;
 
 namespace LabTracker.Tests;
-
-using LabTracker;
-using LabTracker.Unifi;
 
 /// <summary>
 /// Integration tests to verify MAC address normalization across different sources
@@ -65,10 +65,11 @@ public class MacAddressNormalizationTest
         // Assert
         // Verify that lowercase MAC from API is normalized to uppercase
         Assert.Single(result);
-        Assert.True(result.ContainsKey("AA:BB:CC:DD:EE:FF"));
-        Assert.False(result.ContainsKey("aa:bb:cc:dd:ee:ff"));
+        var expectedKey = "AP-1:AA:BB:CC:DD:EE:FF";
+        Assert.True(result.ContainsKey(expectedKey));
+        Assert.False(result.ContainsKey("AP-1:aa:bb:cc:dd:ee:ff"));
         
-        var clientState = result["AA:BB:CC:DD:EE:FF"];
+        var clientState = result[expectedKey];
         Assert.Equal("AA:BB:CC:DD:EE:FF", clientState.ClientId);
     }
 

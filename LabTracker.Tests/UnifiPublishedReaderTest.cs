@@ -81,30 +81,34 @@ public class UnifiPublishedReaderTest
         Assert.Equal(4, result.Count); // 2 clients per site * 2 sites
         
         // Verify clients from site1
-        Assert.True(result.ContainsKey("11:22:33:44:55:66"));
-        var client1 = result["11:22:33:44:55:66"];
+        var expectedKey1 = "AP-1:11:22:33:44:55:66";
+        Assert.True(result.ContainsKey(expectedKey1));
+        var client1 = result[expectedKey1];
         Assert.Equal("11:22:33:44:55:66", client1.ClientId);
         Assert.Equal("AP-1", client1.ApHostname);
         Assert.True(client1.IsConnected);
         Assert.Contains("Connected to AP-1", client1.LastPayload);
 
-        Assert.True(result.ContainsKey("77:88:99:AA:BB:CC"));
-        var client2 = result["77:88:99:AA:BB:CC"];
+        var expectedKey2 = "AP-2:77:88:99:AA:BB:CC";
+        Assert.True(result.ContainsKey(expectedKey2));
+        var client2 = result[expectedKey2];
         Assert.Equal("77:88:99:AA:BB:CC", client2.ClientId);
         Assert.Equal("AP-2", client2.ApHostname);
         Assert.True(client2.IsConnected);
         Assert.Contains("Connected to AP-2", client2.LastPayload);
 
         // Verify clients from site2
-        Assert.True(result.ContainsKey("AA:BB:CC:DD:EE:FF"));
-        var client3 = result["AA:BB:CC:DD:EE:FF"];
+        var expectedKey3 = "AP-1:AA:BB:CC:DD:EE:FF";
+        Assert.True(result.ContainsKey(expectedKey3));
+        var client3 = result[expectedKey3];
         Assert.Equal("AA:BB:CC:DD:EE:FF", client3.ClientId);
         Assert.Equal("AP-1", client3.ApHostname);
         Assert.True(client3.IsConnected);
         Assert.Contains("Connected to AP-1", client3.LastPayload);
 
-        Assert.True(result.ContainsKey("DD:EE:FF:11:22:33"));
-        var client4 = result["DD:EE:FF:11:22:33"];
+        var expectedKey4 = "AP-2:DD:EE:FF:11:22:33";
+        Assert.True(result.ContainsKey(expectedKey4));
+        var client4 = result[expectedKey4];
         Assert.Equal("DD:EE:FF:11:22:33", client4.ClientId);
         Assert.Equal("AP-2", client4.ApHostname);
         Assert.True(client4.IsConnected);
@@ -143,7 +147,8 @@ public class UnifiPublishedReaderTest
 
         // Assert
         Assert.Single(result);
-        var client = result["11:22:33:44:55:66"];
+        var expectedKey = $"{Options.AllApsAggregate}:11:22:33:44:55:66";
+        var client = result[expectedKey];
         Assert.Equal(Options.AllApsAggregate, client.ApHostname);
         Assert.Contains($"Connected to {Options.AllApsAggregate}", client.LastPayload);
     }
@@ -191,7 +196,8 @@ public class UnifiPublishedReaderTest
 
         // Assert
         Assert.Single(result);
-        var client = result["11:22:33:44:55:66"];
+        var expectedKey = "unknown-device:11:22:33:44:55:66";
+        var client = result[expectedKey];
         Assert.Equal("unknown-device", client.ApHostname); // Should use ApId when device name not found
     }
 
@@ -243,7 +249,8 @@ public class UnifiPublishedReaderTest
 
         // Assert
         Assert.Single(result); // Should have one client from the good site
-        Assert.True(result.ContainsKey("11:22:33:44:55:66"));
+        var expectedKey = "AP-1:11:22:33:44:55:66";
+        Assert.True(result.ContainsKey(expectedKey));
     }
 
     [Fact]
@@ -278,10 +285,11 @@ public class UnifiPublishedReaderTest
         // Assert
         Assert.Single(result);
         // Should be normalized to uppercase
-        Assert.True(result.ContainsKey("AA:BB:CC:DD:EE:FF"));
-        Assert.False(result.ContainsKey("aa:bb:cc:dd:ee:ff")); // Should not contain lowercase version
+        var expectedKey = "AP-1:AA:BB:CC:DD:EE:FF";
+        Assert.True(result.ContainsKey(expectedKey));
+        Assert.False(result.ContainsKey("AP-1:aa:bb:cc:dd:ee:ff")); // Should not contain lowercase version
         
-        var client = result["AA:BB:CC:DD:EE:FF"];
+        var client = result[expectedKey];
         Assert.Equal("AA:BB:CC:DD:EE:FF", client.ClientId); // ClientId should also be uppercase
     }
 }

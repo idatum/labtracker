@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using LabTracker.Ssh;
 
 namespace LabTracker;
 
@@ -60,9 +61,9 @@ public class Worker : BackgroundService
             }
             catch (SshConnectionException)
             {
-                _logger.LogWarning("SSH connection failure detected. Processing will restart.");
+                _logger.LogWarning("SSH connection failure detected. Processing skipped.");
                 await Task.Delay(_options.DelayMs, stoppingToken);
-                break;
+                continue;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -81,7 +82,7 @@ public class Worker : BackgroundService
     }
 
     /// <summary>
-    /// Initialize client states from current published MQTT messages
+    /// Initialize client states.
     /// </summary>
     private async Task InitializeClientStatesAsync()
     {
@@ -97,12 +98,13 @@ public class Worker : BackgroundService
                     ? (state.ApHostname ?? "unknown")
                     : Options.AllApsAggregate;
 
-                if (!_lastClientsByAp.ContainsKey(apHostname))
+                if (!_lastClientsByAp.TryGetValue(apHostname, out List<string>? value))
                 {
-                    _lastClientsByAp[apHostname] = [];
+                    value = [];
+                    _lastClientsByAp[apHostname] = value;
                 }
 
-                _lastClientsByAp[apHostname].Add(state.ClientId);
+                value.Add(state.ClientId);
 
                 _logger.LogDebug("Initialized client {clientId} as connected to {ap}",
                     state.ClientId, apHostname);
@@ -229,7 +231,7 @@ public class Worker : BackgroundService
         foreach (var client in clients)
         {
             _logger.LogDebug("Client {mac} : {name}", client.Mac, client.DisplayName);
-            var clientId = client.GetClientId(_options.Mqtt.UseHostname);
+            var clientId = client.GetClientId();
             
             if (!string.IsNullOrEmpty(clientId) && clientId != "Unknown")
             {

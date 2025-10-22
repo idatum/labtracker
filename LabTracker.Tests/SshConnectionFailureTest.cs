@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
+using LabTracker.Ssh;
 
 namespace LabTracker.Tests;
 

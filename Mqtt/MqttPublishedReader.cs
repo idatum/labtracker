@@ -2,7 +2,6 @@ using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Protocol;
 using System.Collections.Concurrent;
-using System.Text;
 
 namespace LabTracker.Mqtt;
 
@@ -17,7 +16,7 @@ public class MqttPublishedReader : IPublished
     private readonly Options _options;
 
     /// <summary>
-    /// Gets a value indicating whether this implementation forces a complete snapshot of all clients.
+    /// Whether this implementation forces a complete snapshot of all clients.
     /// </summary>
     public bool ForceSnapshot => false;
 
@@ -120,7 +119,7 @@ public class MqttPublishedReader : IPublished
                         var isConnected = IsConnectedPayload(payload);
 
                         // Create client state
-                        var key = CreateClientStateKey(clientId, apHostname);
+                        var key = PublishedUtils.CreateClientStateKey(clientId, apHostname);
                         var clientState = new ClientState
                         {
                             ClientId = clientId,
@@ -216,11 +215,5 @@ public class MqttPublishedReader : IPublished
     private bool IsConnectedPayload(string payload)
     {
         return string.Equals(payload, _options.Mqtt.ConnectedPayload, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string CreateClientStateKey(string clientId, string? apHostname)
-    {
-        // apHostname should now always be set (either from topic or aggregated AP name)
-        return $"{apHostname ?? "unknown"}:{clientId}";
     }
 }

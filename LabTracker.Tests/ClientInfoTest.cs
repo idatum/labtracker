@@ -1,62 +1,9 @@
-﻿using LabTracker;
-using Xunit;
+﻿using Xunit;
 
 namespace LabTracker.Tests;
 
 public class ClientInfoTest
 {
-    [Fact]
-    public void GetClientId_WhenUseHostnameTrue_ShouldPreferHostname()
-    {
-        // Arrange
-        var clientInfo = new ClientInfo("AA:BB:CC:DD:EE:FF", "192.168.1.100", "laptop", 30);
-        
-        // Act
-        var result = clientInfo.GetClientId(useHostname: true);
-        
-        // Assert
-        Assert.Equal("laptop", result);
-    }
-    
-    [Fact]
-    public void GetClientId_WhenUseHostnameFalse_ShouldPreferMac()
-    {
-        // Arrange
-        var clientInfo = new ClientInfo("AA:BB:CC:DD:EE:FF", "192.168.1.100", "laptop", 30);
-        
-        // Act
-        var result = clientInfo.GetClientId(useHostname: false);
-        
-        // Assert
-        Assert.Equal("AA:BB:CC:DD:EE:FF", result);
-    }
-    
-    [Fact]
-    public void GetClientId_WhenHostnameNullAndUseHostnameTrue_ShouldFallbackToMac()
-    {
-        // Arrange
-        var clientInfo = new ClientInfo("AA:BB:CC:DD:EE:FF", "192.168.1.100", null, 30);
-        
-        // Act
-        var result = clientInfo.GetClientId(useHostname: true);
-        
-        // Assert
-        Assert.Equal("AA:BB:CC:DD:EE:FF", result);
-    }
-    
-    [Fact]
-    public void GetClientId_WhenMacNullAndUseHostnameFalse_ShouldFallbackToHostname()
-    {
-        // Arrange
-        var clientInfo = new ClientInfo(null, "192.168.1.100", "laptop", 30);
-        
-        // Act
-        var result = clientInfo.GetClientId(useHostname: false);
-        
-        // Assert
-        Assert.Equal("laptop", result);
-    }
-    
     [Fact]
     public void GetClientId_WhenBothMacAndHostnameNull_ShouldReturnUnknown()
     {
@@ -64,7 +11,7 @@ public class ClientInfoTest
         var clientInfo = new ClientInfo(null, "192.168.1.100", null, 30);
         
         // Act
-        var result = clientInfo.GetClientId(useHostname: true);
+        var result = clientInfo.GetClientId();
         
         // Assert
         Assert.Equal("Unknown", result);

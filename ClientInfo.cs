@@ -17,13 +17,10 @@ public readonly struct ClientInfo(string? mac, string? ip, string? hostname, int
     public string DisplayName => Hostname ?? Mac ?? "Unknown";
 
     /// <summary>
-    /// Get a unique identifier for the client, preferring hostname or MAC based on the parameter.
+    /// Get a unique identifier for the client.
     /// </summary>
-    /// <param name="useHostname">If true, prefer hostname over MAC</param>
     /// <returns>Client identifier string</returns>    
-    public string GetClientId(bool useHostname = false) => useHostname
-        ? (Hostname ?? Mac ?? "Unknown")
-        : (Mac ?? Hostname ?? "Unknown");
+    public string GetClientId() => Mac ?? "Unknown";
 
     /// <summary>
     /// Check if the client is considered idle based on max idle time

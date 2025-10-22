@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Renci.SshNet;
 
-namespace LabTracker;
+namespace LabTracker.Ssh;
 
 /// <summary>
 /// SSH-based implementation of IClientInfoProvider for retrieving client information from UniFi Access Points.

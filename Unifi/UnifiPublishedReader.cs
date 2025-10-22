@@ -2,8 +2,6 @@ using Microsoft.Extensions.Options;
 
 namespace LabTracker.Unifi;
 
-using LabTracker;
-
 /// <summary>
 /// UniFi API implementation that reads current published client states from UniFi controllers.
 /// </summary>
@@ -32,7 +30,7 @@ public class UnifiPublishedReader : IPublished
 
             // Get all sites from the UniFi controller
             var sites = await _unifiApiClient.GetSitesAsync();
-            if (!sites.Any())
+            if (sites.Count == 0)
             {
                 _logger.LogWarning("No UniFi sites found");
                 return clientStates;
@@ -51,21 +49,16 @@ public class UnifiPublishedReader : IPublished
 
                     // Get wireless clients for this site
                     var clients = await _unifiApiClient.GetWirelessClientsAsync(site.Id);
-                    
+
                     _logger.LogDebug("Site {SiteName}: Found {ClientCount} wireless clients", site.Name, clients.Count);
 
                     foreach (var client in clients)
                     {
-                        // Determine AP hostname - use device name if available, otherwise use AP ID
-                        var apHostname = deviceMap.TryGetValue(client.ApId, out var deviceName) 
-                            ? deviceName 
-                            : client.ApId;
-
-                        // If we're aggregating APs, use the aggregate name
-                        if (!_options.Mqtt.IncludeApInTopic)
-                        {
-                            apHostname = Options.AllApsAggregate;
-                        }
+                        var apHostname = _options.Mqtt.IncludeApInTopic
+                            ? deviceMap.TryGetValue(client.ApId, out var deviceName)
+                                ? deviceName
+                                : client.ApId
+                            : Options.AllApsAggregate;
 
                         // Ensure MAC address is always uppercase for consistency
                         var macAddress = client.Mac.ToUpperInvariant();
@@ -74,13 +67,12 @@ public class UnifiPublishedReader : IPublished
                         {
                             ClientId = macAddress,
                             ApHostname = apHostname,
-                            IsConnected = true, // All clients returned by API are currently connected
+                            IsConnected = true,
                             LastUpdated = DateTime.UtcNow,
                             LastPayload = $"Connected to {apHostname} at {client.ConnectedAt}"
                         };
 
-                        // Use MAC address as the key (same as MQTT implementation)
-                        clientStates[macAddress] = clientState;
+                        clientStates[PublishedUtils.CreateClientStateKey(clientState.ClientId, apHostname)] = clientState;
                     }
                 }
                 catch (Exception ex)

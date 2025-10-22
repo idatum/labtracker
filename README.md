@@ -38,7 +38,6 @@ Create `appsettings.Options.json` similar to this:
       "IncludeApInTopic": true,
       "UseTls": true,
       "Retain": true,
-      "UseHostname": false,
       "ConnectedPayload": "home",
       "DisconnectedPayload": "not_home"
     }
@@ -137,7 +136,6 @@ podman run -d \
 | `Password` | MQTT password | - |
 | `TopicPrefix` | Base topic prefix | `labtracker` |
 | `IncludeApInTopic` | Include AP name in topic path | `true` |
-| `UseHostname` | Use device hostname as client ID | `false` |
 | `UseTls` | Enable TLS encryption | `false` |
 | `Retain` | Set retain flag on messages | `false` |
 | `ConnectedPayload` | Message payload for connected clients | `home` |
@@ -146,7 +144,8 @@ podman run -d \
 ## Initial State Options
 
 - **`MQTT`**: Read current client states from MQTT retained messages
-- **`UnifiAPI`**: Query UniFi Controller API for current client states
+- **`UnifiApI`**: Query UniFi Controller API for current client states
+- **`All`**: Both MQTT and UnifiApi.
 - **`None`**: Start with empty state, only track changes from startup
 
 ## Details
