@@ -107,8 +107,8 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
     {
         if (!IsConnected)
         {
-            _logger.LogInformation("MQTT client not connected, skipping publish");
-            return;
+            _logger.LogInformation("MQTT client not connected. Initializing connection.");
+            await InitializeAsync();
         }
 
         try

@@ -11,6 +11,8 @@ public class SshClientProvider : IClientInfoProvider
 {
     private readonly ILogger<SshClientProvider> _logger;
     private readonly Options _options;
+    private static readonly int _maxAttempts = 2;
+    private static readonly int _retryDelayMs = 500;
 
     public SshClientProvider(ILogger<SshClientProvider> logger, IOptions<Options> options)
     {
@@ -26,56 +28,28 @@ public class SshClientProvider : IClientInfoProvider
     /// <returns>Tuple containing the device hostname and list of connected clients</returns>
     public async Task<(string? hostname, List<ClientInfo> clients)> GetClientsAsync(string host, CancellationToken stoppingToken)
     {
-        try
-        {
-            var hostData = await ExecuteSshCommand(host, "mca-dump", stoppingToken);
-            var (hostname, clients) = ParseHostData(hostData, host);
-            return (hostname, clients);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SSH connection failed for host {host}", host);
-            // Re-throw as SshConnectionException to allow Worker to detect SSH failures
-            throw new SshConnectionException($"Failed to connect to SSH host {host}", ex);
-        }
-    }
-
-    /// <summary>
-    /// Retrieves client information from multiple hosts in parallel.
-    /// </summary>
-    /// <param name="hosts">Collection of IP addresses or hostnames of target devices</param>
-    /// <param name="stoppingToken">Cancellation token to abort the operation</param>
-    /// <returns>Dictionary with device hostname as key and list of connected clients as value</returns>
-    public async Task<Dictionary<string, List<ClientInfo>>> GetClientsFromMultipleHostsAsync(IEnumerable<string> hosts, CancellationToken stoppingToken)
-    {
-        var tasks = hosts.Select(async host =>
+        var attempt = 0;
+        while (true)
         {
             try
             {
-                var result = await GetClientsAsync(host, stoppingToken);
-                return new { Host = host, Result = result, Success = true };
+                var hostData = await ExecuteSshCommand(host, "mca-dump", stoppingToken);
+                var (hostname, clients) = ParseHostData(hostData, host);
+                return (hostname, clients);
             }
-            catch (SshConnectionException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "SSH connection failed for host {host} during multi-host operation", host);
-                // Return empty result for failed connections to maintain compatibility
-                return new { Host = host, Result = (hostname: (string?)null, clients: new List<ClientInfo>()), Success = false };
-            }
-        });
-
-        var results = await Task.WhenAll(tasks);
-        var clientsPerHost = new Dictionary<string, List<ClientInfo>>();
-
-        foreach (var item in results)
-        {
-            var (hostname, clients) = item.Result;
-            if (!string.IsNullOrEmpty(hostname))
-            {
-                clientsPerHost[hostname] = clients;
+                ++attempt;
+                if (attempt < _maxAttempts)
+                {
+                    _logger.LogInformation(ex, "SSH command execution failed for host {host}. Retrying {attempt}/{maxRetries}.", host, attempt, _maxAttempts);
+                    await Task.Delay(_retryDelayMs, stoppingToken);
+                    continue;
+                }
+                _logger.LogWarning(ex, "SSH connection failed for host {host}", host);
+                throw new SshConnectionException($"Failed to connect to SSH host {host}", ex);
             }
         }
-
-        return clientsPerHost;
     }
 
     /// <summary>
@@ -137,14 +111,14 @@ public class SshClientProvider : IClientInfoProvider
         var hostname = rootElement.GetProperty("hostname").GetString() ?? sshHost;
         _logger.LogDebug("SSH hostname of {host} is AP {hostname}", sshHost, hostname);
         
-        if (rootElement.TryGetProperty("vap_table", out JsonElement vapTable) && 
+        if (rootElement.TryGetProperty("vap_table", out JsonElement vapTable) &&
             vapTable.ValueKind == JsonValueKind.Array)
         {
             var clients = ProcessVapTable(vapTable, hostname);
             return (hostname, clients);
         }
         
-        _logger.LogError("No vap_table found in response for {hostname}", hostname);
+        _logger.LogWarning("No vap_table found in response for {hostname}", hostname);
         throw new SshConnectionException($"Invalid response from SSH host {hostname}: no vap_table found");
     }
 

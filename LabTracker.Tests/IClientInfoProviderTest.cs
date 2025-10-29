@@ -75,65 +75,15 @@ public class IClientInfoProviderTest
         Assert.Contains($"Failed to connect to SSH host {host}", exception.Message);
         Assert.NotNull(exception.InnerException);
         
-        // Verify error logging occurred
+        // Verify warning logging occurred for final failure
         _mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"SSH connection failed for host {host}")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
-    }
-
-    [Fact]
-    public async Task GetClientsFromMultipleHostsAsync_WithEmptyHosts_ShouldReturnEmptyDictionary()
-    {
-        // Arrange
-        var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
-        var hosts = Array.Empty<string>();
-        using var cts = new CancellationTokenSource();
-        
-        // Act
-        var result = await provider.GetClientsFromMultipleHostsAsync(hosts, cts.Token);
-        
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetClientsFromMultipleHostsAsync_WithMultipleHosts_ShouldProcessInParallel()
-    {
-        // Arrange
-        var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
-        var hosts = new[] { "192.168.1.100", "192.168.1.101", "192.168.1.102" };
-        using var cts = new CancellationTokenSource();
-        
-        // Act
-        var result = await provider.GetClientsFromMultipleHostsAsync(hosts, cts.Token);
-        
-        // Assert
-        Assert.NotNull(result);
-        // Should handle connection errors and return empty dictionary for invalid hosts
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetClientsFromMultipleHostsAsync_WithCancellation_ShouldHandleGracefully()
-    {
-        // Arrange
-        var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
-        var hosts = new[] { "192.168.1.100", "192.168.1.101" };
-        using var cts = new CancellationTokenSource();
-        cts.Cancel();
-        
-        // Act
-        var result = await provider.GetClientsFromMultipleHostsAsync(hosts, cts.Token);
-        
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
     }
 
     [Theory]
@@ -190,23 +140,6 @@ public class IClientInfoProviderTest
         Assert.Contains("Failed to connect to SSH host 192.168.1.100", exception.Message);
         Assert.NotNull(exception.InnerException);
     }
-
-    [Fact]
-    public async Task GetClientsFromMultipleHostsAsync_WithDuplicateHosts_ShouldHandleCorrectly()
-    {
-        // Arrange
-        var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
-        var hosts = new[] { "192.168.1.100", "192.168.1.100", "192.168.1.101" };
-        using var cts = new CancellationTokenSource();
-        
-        // Act
-        var result = await provider.GetClientsFromMultipleHostsAsync(hosts, cts.Token);
-        
-        // Assert
-        Assert.NotNull(result);
-        // Should handle duplicates without errors
-        Assert.Empty(result); // No valid connections expected
-    }
 }
 
 /// <summary>
@@ -224,10 +157,6 @@ public class IClientInfoProviderContractTest
         var getClientsMethod = interfaceType.GetMethod("GetClientsAsync");
         Assert.NotNull(getClientsMethod);
         Assert.Equal(typeof(Task<(string?, List<ClientInfo>)>), getClientsMethod.ReturnType);
-        
-        var getMultipleClientsMethod = interfaceType.GetMethod("GetClientsFromMultipleHostsAsync");
-        Assert.NotNull(getMultipleClientsMethod);
-        Assert.Equal(typeof(Task<Dictionary<string, List<ClientInfo>>>), getMultipleClientsMethod.ReturnType);
     }
 
     [Fact]
@@ -244,24 +173,6 @@ public class IClientInfoProviderContractTest
         Assert.Equal(2, parameters.Length);
         Assert.Equal("host", parameters[0].Name);
         Assert.Equal(typeof(string), parameters[0].ParameterType);
-        Assert.Equal("stoppingToken", parameters[1].Name);
-        Assert.Equal(typeof(CancellationToken), parameters[1].ParameterType);
-    }
-
-    [Fact]
-    public void IClientInfoProvider_GetClientsFromMultipleHostsAsync_HasCorrectParameters()
-    {
-        // Arrange
-        var interfaceType = typeof(IClientInfoProvider);
-        var method = interfaceType.GetMethod("GetClientsFromMultipleHostsAsync");
-        
-        // Act
-        var parameters = method!.GetParameters();
-        
-        // Assert
-        Assert.Equal(2, parameters.Length);
-        Assert.Equal("hosts", parameters[0].Name);
-        Assert.Equal(typeof(IEnumerable<string>), parameters[0].ParameterType);
         Assert.Equal("stoppingToken", parameters[1].Name);
         Assert.Equal(typeof(CancellationToken), parameters[1].ParameterType);
     }
@@ -344,10 +255,10 @@ public class SshClientProviderEdgeCaseTest
         Assert.Contains("Failed to connect to SSH host 192.168.1.100", exception.Message);
         Assert.NotNull(exception.InnerException);
         
-        // Verify error logging still occurs
+        // Verify warning logging still occurs for final failure
         _mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<Exception>(),
@@ -386,21 +297,5 @@ public class SshClientProviderEdgeCaseTest
         // Act & Assert - Should not throw
         var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
         Assert.NotNull(provider);
-    }
-
-    [Fact]
-    public async Task GetClientsFromMultipleHostsAsync_WithMixedValidInvalidHosts_ShouldHandleAll()
-    {
-        // Arrange
-        var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
-        var hosts = new[] { "192.168.1.100", "invalid-host", "", "test.local" };
-        using var cts = new CancellationTokenSource();
-        
-        // Act
-        var result = await provider.GetClientsFromMultipleHostsAsync(hosts, cts.Token);
-        
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result); // All should fail to connect in test environment
     }
 }

@@ -43,7 +43,7 @@ public class SshConnectionFailureTest
     }
 
     [Fact]
-    public async Task Worker_WhenSshConnectionFails_ShouldTriggerServiceRestart()
+    public async Task Worker_WhenSshConnectionFails_ShouldSkipProcessingAndContinue()
     {
         // Arrange
         var cts = new CancellationTokenSource();
@@ -59,7 +59,7 @@ public class SshConnectionFailureTest
             _mockPublisher.Object, _mockPublished.Object, _mockClientProvider.Object);
 
         // Act & Assert
-        // The worker should catch SSH exceptions and call StopApplication
+        // The worker should catch SSH exceptions and continue (not call StopApplication)
         var executeTask = worker.StartAsync(cts.Token);
         
         // Give it a moment to start and process
@@ -77,8 +77,8 @@ public class SshConnectionFailureTest
             // Expected when cancellation occurs
         }
 
-        // Verify that StopApplication was called due to SSH failure
-        _mockHostLifetime.Verify(x => x.StopApplication(), Times.AtLeastOnce);
+        // Verify that StopApplication was NOT called due to SSH failure
+        _mockHostLifetime.Verify(x => x.StopApplication(), Times.Never);
     }
 
     [Fact]

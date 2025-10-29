@@ -46,7 +46,17 @@ public class Worker : BackgroundService
     /// <param name="stoppingToken">Cancellation token to stop the service</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _publisher.InitializeAsync();
+        _logger.LogInformation("Worker starting at: {time}", DateTimeOffset.Now);
+        try
+        {
+            await _publisher.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failure during worker startup. Sutting down.");
+            _hostApplicationLifetime.StopApplication();
+            return;
+        }
 
         await InitializeClientStatesAsync();
         
@@ -61,7 +71,7 @@ public class Worker : BackgroundService
             }
             catch (SshConnectionException)
             {
-                _logger.LogWarning("SSH connection failure detected. Processing skipped.");
+                _logger.LogDebug("SSH connection failure detected. Pausing for {} ms.", _options.DelayMs);
                 await Task.Delay(_options.DelayMs, stoppingToken);
                 continue;
             }
@@ -144,41 +154,42 @@ public class Worker : BackgroundService
     }
 
     /// <summary>
-    /// Main processing loop that connects to all configured UniFi Access Points.
+    /// Main processing loop that connects to all configured UniFi Access Points in parallel.
     /// </summary>
     /// <param name="stoppingToken">Cancellation token to stop processing</param>
     private async Task Process(CancellationToken stoppingToken)
     {
-        var results = new List<(string? hostname, List<ClientInfo> clients)>();
-        var failureCount = 0;
-
-        // Process each host individually to handle failures gracefully
-        foreach (var sshHost in _options.Unifi.AccessPoints)
+        // Create tasks for processing all hosts in parallel
+        var hostTasks = _options.Unifi.AccessPoints.Select(async sshHost =>
         {
             try
             {
                 var result = await ProcessHost(sshHost, stoppingToken);
-                results.Add(result);
+                return new { Host = sshHost, Result = result, Success = true };
             }
             catch (SshConnectionException ex)
             {
                 _logger.LogWarning(ex, "SSH connection failed for host {host}", sshHost);
-                failureCount++;
-                // Add empty result to maintain consistency
-                results.Add((null, new List<ClientInfo>()));
+                return new { Host = sshHost, Result = ((string?)null, new List<ClientInfo>()), Success = false };
             }
-        }
+        }).ToArray();
 
-        // If any SSH connections failed, trigger a service restart
-        if (failureCount > 0)
+        // Wait for all tasks to complete
+        var hostResults = await Task.WhenAll(hostTasks);
+
+        // Check for any failures - if any host failed, skip all processing
+        var failures = hostResults.Where(r => !r.Success).ToList();
+        if (failures.Count > 0)
         {
-            _logger.LogError("SSH connection failures detected ({failureCount}/{totalHosts}). Triggering service restart.", 
-                failureCount, _options.Unifi.AccessPoints.Length);
-            _hostApplicationLifetime.StopApplication();
-            throw new SshConnectionException($"SSH failures detected: {failureCount}/{_options.Unifi.AccessPoints.Length} hosts failed");
+            var failedHosts = failures.Select(f => f.Host).ToList();
+            _logger.LogDebug("SSH connection failures detected ({failureCount}/{totalHosts}): {failedHosts}. Skipping all processing.", 
+                failures.Count, _options.Unifi.AccessPoints.Length, string.Join(", ", failedHosts));
+            throw new SshConnectionException($"SSH failures detected: {failures.Count}/{_options.Unifi.AccessPoints.Length} hosts failed ({string.Join(", ", failedHosts)}). All processing skipped.");
         }
 
-        await ProcessClients(results.ToArray(), stoppingToken);
+        // Only process clients if all SSH connections succeeded
+        var results = hostResults.Select(r => r.Result).ToArray();
+        await ProcessClients(results, stoppingToken);
     }
 
     /// <summary>
