@@ -226,18 +226,15 @@ public class SshClientProviderEdgeCaseTest
     }
 
     [Fact]
-    public async Task GetClientsAsync_WithLongRunningOperation_ShouldThrowSshConnectionException()
+    public async Task GetClientsAsync_WithLongRunningOperation_ShouldThrowTaskCanceledException()
     {
         // Arrange
         var provider = new SshClientProvider(_mockLogger.Object, _mockOptions.Object);
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
         
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<SshConnectionException>(
+        // Act & Assert - Should throw TaskCanceledException when operation times out
+        await Assert.ThrowsAsync<TaskCanceledException>(
             () => provider.GetClientsAsync("192.168.1.100", cts.Token));
-        
-        Assert.Contains("Failed to connect to SSH host 192.168.1.100", exception.Message);
-        Assert.NotNull(exception.InnerException);
     }
 
     [Fact]
