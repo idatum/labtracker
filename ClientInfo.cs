@@ -1,7 +1,7 @@
 namespace LabTracker;
 
 /// <summary>
-/// Immutable struct to hold client information.
+/// Client information.
 /// </summary>
 /// <param name="mac">Client MAC address</param>
 /// <param name="ip">Client IP address</param>
@@ -17,20 +17,20 @@ public readonly struct ClientInfo(string? mac, string? ip, string? hostname, int
     public string DisplayName => Hostname ?? Mac ?? "Unknown";
 
     /// <summary>
-    /// Get a unique identifier for the client.
+    /// Unique identifier for the client.
     /// </summary>
     /// <returns>Client identifier string</returns>    
     public string GetClientId() => Mac ?? "Unknown";
 
     /// <summary>
-    /// Check if the client is considered idle based on max idle time
+    /// Whether client is considered idle based on max idle time
     /// </summary>
     /// <param name="maxIdleSeconds">Maximum idle time in seconds</param>
     /// <returns>True if client is idle, false otherwise</returns>
     public bool IsIdle(int maxIdleSeconds) => IdleTime.HasValue && IdleTime.Value > maxIdleSeconds;
 
     /// <summary>
-    /// Returns a string representation of the client information.
+    /// String representation of the client information.
     /// </summary>
     /// <returns>Formatted string with client details</returns>
     public override string ToString()

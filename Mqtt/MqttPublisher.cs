@@ -16,7 +16,7 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
     private IMqttClient? _mqttClient;
 
     /// <summary>
-    /// Initializes a new instance of the MqttPublisher class.
+    /// Contructor.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output</param>
     /// <param name="options">Configuration options containing MQTT broker settings</param>
@@ -27,7 +27,7 @@ public class MqttPublisher : IPublisher, IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets a value indicating whether the MQTT client is currently connected to the broker.
+    /// Whether the MQTT client is currently connected to the broker.
     /// </summary>
     public bool IsConnected => _mqttClient?.IsConnected ?? false;
 

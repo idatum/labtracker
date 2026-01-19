@@ -21,7 +21,7 @@ public class SshClientProvider : IClientInfoProvider
     }
 
     /// <summary>
-    /// Retrieves client information from a specific host via SSH.
+    /// Client information via SSH.
     /// </summary>
     /// <param name="host">IP address or hostname of the target UniFi AP</param>
     /// <param name="stoppingToken">Cancellation token to abort the operation</param>
@@ -53,7 +53,7 @@ public class SshClientProvider : IClientInfoProvider
     }
 
     /// <summary>
-    /// Executes an SSH command on the specified UniFi Access Point.
+    /// Executes an SSH command a UniFi Access Point.
     /// </summary>
     /// <param name="sshHost">IP address or hostname of the target AP</param>
     /// <param name="command">SSH command to execute (typically 'mca-dump')</param>
@@ -169,7 +169,7 @@ public class SshClientProvider : IClientInfoProvider
     }
 
     /// <summary>
-    /// Filters a JSON element to extract only the specified properties into a ClientInfo object.
+    /// Filter properties into a ClientInfo object.
     /// </summary>
     /// <param name="element">JSON element representing a client entry</param>
     /// <param name="propertiesToInclude">Array of property names to include in the ClientInfo</param>

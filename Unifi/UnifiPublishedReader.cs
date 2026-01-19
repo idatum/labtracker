@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 namespace LabTracker.Unifi;
 
 /// <summary>
-/// UniFi API implementation that reads current published client states from UniFi controllers.
+/// UniFi API implementation to read state from UniFi controllers.
 /// </summary>
 public class UnifiPublishedReader : IPublished
 {

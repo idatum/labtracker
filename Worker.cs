@@ -22,7 +22,7 @@ public class Worker : BackgroundService
     private readonly Dictionary<string, List<string>> _lastClientsByAp = new();
 
     /// <summary>
-    /// Initializes a new instance of the Worker class.
+    /// Contructor.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output</param>
     /// <param name="hostApplicationLifetime">Application lifetime manager</param>
@@ -262,7 +262,7 @@ public class Worker : BackgroundService
     }
 
     /// <summary>
-    /// Calculate the difference between current and last known client states
+    /// Difference between current and last known client states
     /// </summary>
     private (List<string> newClients, List<string> disconnectedClients) CalculateClientDiff(string apKey, List<string> currentClients)
     {

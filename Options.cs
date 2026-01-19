@@ -1,7 +1,7 @@
 namespace LabTracker;
 
 /// <summary>
-/// Defines how the application should initialize its state on startup.
+/// Initialization options.
 /// </summary>
 public enum InitialState
 {

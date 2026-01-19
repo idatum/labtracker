@@ -1,7 +1,7 @@
 namespace LabTracker;
 
 /// <summary>
-/// Interface for publishing client presence data
+/// Publish client presence data
 /// </summary>
 public interface IPublisher
 {
@@ -19,12 +19,12 @@ public interface IPublisher
     Task PublishClientsAsync(string apHostname, List<string> connectedClients, List<string> disconnectedClients);
 
     /// <summary>
-    /// Check if the publisher is connected and ready
+    /// Whether publisher is connected and ready
     /// </summary>
     bool IsConnected { get; }
 
     /// <summary>
-    /// Dispose of resources
+    /// Dispose
     /// </summary>
     ValueTask DisposeAsync();
 }

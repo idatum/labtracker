@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace LabTracker;
 
 /// <summary>
-/// Combined implementation that reads client states from both MQTT retained messages and UniFi API.
+/// Combined implementation of MQTT and UniFi API states.
 /// </summary>
 public class CombinedPublishedReader : IPublished
 {
@@ -14,12 +14,12 @@ public class CombinedPublishedReader : IPublished
     private readonly UnifiPublishedReader _unifiReader;
 
     /// <summary>
-    /// Gets a value indicating whether this implementation forces a complete snapshot.
+    /// Whether this implementation forces a complete snapshot.
     /// </summary>
     public bool ForceSnapshot => true;
 
     /// <summary>
-    /// Initializes a new instance of the CombinedPublishedReader class.
+    /// Contructor.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output</param>
     /// <param name="options">Configuration options for both MQTT and UniFi connections</param>

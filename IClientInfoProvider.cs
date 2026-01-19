@@ -1,12 +1,12 @@
 namespace LabTracker;
 
 /// <summary>
-/// Interface for retrieving client information from network devices.
+/// Client information provider.
 /// </summary>
 public interface IClientInfoProvider
 {
     /// <summary>
-    /// Retrieves client information from a specific host.
+    /// Client information for a device.
     /// </summary>
     /// <param name="host">IP address or hostname of the target device</param>
     /// <param name="stoppingToken">Cancellation token to abort the operation</param>

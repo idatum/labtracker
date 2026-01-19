@@ -8,7 +8,7 @@ namespace LabTracker.Mqtt;
 using LabTracker;
 
 /// <summary>
-/// MQTT implementation that reads current published client states from retained messages.
+/// Read current published client states from retained MQTT messages.
 /// </summary>
 public class MqttPublishedReader : IPublished
 {
@@ -16,12 +16,12 @@ public class MqttPublishedReader : IPublished
     private readonly Options _options;
 
     /// <summary>
-    /// Whether this implementation forces a complete snapshot of all clients.
+    /// Whether to force a complete snapshot of all clients.
     /// </summary>
     public bool ForceSnapshot => false;
 
     /// <summary>
-    /// Initializes a new instance of the MqttPublishedReader class.
+    /// Contructor.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output</param>
     /// <param name="options">Configuration options containing MQTT broker settings</param>
@@ -32,9 +32,9 @@ public class MqttPublishedReader : IPublished
     }
 
     /// <summary>
-    /// Reads current client states from MQTT retained messages by subscribing to the configured topic pattern.
+    /// Reads current client states from MQTT retained messages.
     /// </summary>
-    /// <returns>A dictionary with client state keys and their corresponding connection states</returns>
+    /// <returns>Client state keys and corresponding connection states</returns>
     public async Task<Dictionary<string, ClientState>> ReadCurrentStatesAsync()
     {
         var clientStates = new ConcurrentDictionary<string, ClientState>();
@@ -70,7 +70,7 @@ public class MqttPublishedReader : IPublished
 
             await mqttClient.ConnectAsync(clientOptions);
 
-            // Subscribe to appropriate topic pattern based on configuration
+            // Subscribe to topic pattern based on configuration
             var subscriptionTopic = _options.Mqtt.IncludeApInTopic
                 ? $"{_options.Mqtt.TopicPrefix}/+/+"  // topic/ap/client
                 : $"{_options.Mqtt.TopicPrefix}/+";   // topic/client

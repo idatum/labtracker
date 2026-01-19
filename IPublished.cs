@@ -1,12 +1,12 @@
 namespace LabTracker;
 
 /// <summary>
-/// Interface for reading current published MQTT messages to initialize client state.
+/// Read current published MQTT messages to initialize client state.
 /// </summary>
 public interface IPublished
 {
     /// <summary>
-    /// Indicates whether this implementation forces a complete snapshot of all connected clients.
+    /// Whether this implementation forces a complete snapshot of all connected clients.
     /// </summary>
     bool ForceSnapshot { get; }
 
@@ -18,7 +18,7 @@ public interface IPublished
 }
 
 /// <summary>
-/// Represents the current state of a client from published MQTT messages.
+/// Current state of a client from published MQTT messages.
 /// </summary>
 public class ClientState
 {
