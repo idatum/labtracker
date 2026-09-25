@@ -76,15 +76,6 @@ public class MqttPublishedReader : IPublished
                 : $"{_options.Mqtt.TopicPrefix}/+";   // topic/client
 
             // Set up message handler to collect retained messages
-            var messageCollectionComplete = new TaskCompletionSource<bool>();
-            var timeoutTimer = new System.Timers.Timer(1000);
-
-            timeoutTimer.Elapsed += (_, _) =>
-            {
-                timeoutTimer.Stop();
-                messageCollectionComplete.TrySetResult(true);
-            };
-
             mqttClient.ApplicationMessageReceivedAsync += (e) =>
             {
                 try
@@ -146,11 +137,8 @@ public class MqttPublishedReader : IPublished
 
             _logger.LogInformation("Subscribed to {topic}, waiting for retained messages...", subscriptionTopic);
 
-            // Start the timeout timer
-            timeoutTimer.Start();
-
-            // Wait for message collection to complete
-            await messageCollectionComplete.Task;
+            // Allow retained messages to arrive before disconnecting.
+            await Task.Delay(TimeSpan.FromSeconds(1));
 
             _logger.LogInformation("Finished reading retained messages. Found {count} client states", clientStates.Count);
 

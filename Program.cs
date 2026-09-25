@@ -9,6 +9,10 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Options.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.Options.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
+// Reapply higher-precedence sources after the custom options files.
+builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.AddCommandLine(args);
+
 // Configuration sources (in order of precedence):
 // 1. Command line arguments
 // 2. Environment variables  

@@ -148,7 +148,7 @@ public class MqttPublishedReaderTest
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to read current client states from MQTT")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Failed to read current client states from MQTT")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);

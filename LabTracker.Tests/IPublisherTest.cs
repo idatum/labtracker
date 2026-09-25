@@ -39,7 +39,7 @@ public class ConsolePublisherTest
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Console publisher initialized")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Console publisher initialized")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -61,7 +61,7 @@ public class ConsolePublisherTest
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Published client events for AP test-ap to console")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Published client events for AP test-ap to console")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -83,7 +83,7 @@ public class ConsolePublisherTest
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Published client events for AP test-ap to console")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Published client events for AP test-ap to console")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -105,7 +105,7 @@ public class ConsolePublisherTest
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Published client events for AP test-ap to console")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Published client events for AP test-ap to console")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -122,7 +122,7 @@ public class ConsolePublisherTest
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Console publisher disposed")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains("Console publisher disposed")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);

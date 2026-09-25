@@ -53,7 +53,7 @@ public class Worker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failure during worker startup. Sutting down.");
+            _logger.LogError(ex, "Failure during worker startup. Shutting down.");
             _hostApplicationLifetime.StopApplication();
             return;
         }

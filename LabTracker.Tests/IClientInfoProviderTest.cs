@@ -80,7 +80,7 @@ public class IClientInfoProviderTest
             x => x.Log(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"SSH connection failed for host {host}")),
+                It.Is<It.IsAnyType>((v, t) => (Convert.ToString(v) ?? string.Empty).Contains($"SSH connection failed for host {host}")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);

@@ -1,5 +1,5 @@
 # https://hub.docker.com/_/microsoft-dotnet-sdk/
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.21 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine3.23 AS build
 
 COPY . /app
 WORKDIR /app
@@ -12,7 +12,7 @@ RUN dotnet restore .
 RUN dotnet publish -c Release -o out
 
 # https://hub.docker.com/_/microsoft-dotnet-runtime/
-FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine3.21 AS runtime
+FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine3.23 AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
 ENTRYPOINT ["dotnet", "labtracker.dll"]
